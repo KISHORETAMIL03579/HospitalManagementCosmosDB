@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using HospitalManagementCosmosDB.Application.Interfaces;
 using HospitalManagementCosmosDB.Domain.Entities;
 using HospitalManagementCosmosDB.Infrastructure.Injection;
 using Microsoft.Azure.Cosmos;
@@ -6,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace HospitalManagementCosmosDB.Infrastructure.Repository
 {
-    public class IdempotencyRepository
+    public class IdempotencyRepository : IIdempotencyRepository
     {
         private readonly Container _container;
         private readonly ILogger<IdempotencyRepository> _logger;
