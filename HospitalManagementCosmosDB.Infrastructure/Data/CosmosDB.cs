@@ -30,7 +30,6 @@
 //                Console.WriteLine($"Database '{databaseId}' created.");
 //            }
 
-
 //            // Ensure container
 //            Container container;
 //            try

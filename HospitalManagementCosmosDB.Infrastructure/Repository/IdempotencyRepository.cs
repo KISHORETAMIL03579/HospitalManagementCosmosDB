@@ -1,9 +1,6 @@
 ﻿using HospitalManagementCosmosDB.Domain.Entities;
 using HospitalManagementCosmosDB.Infrastructure.Injection;
 using Microsoft.Azure.Cosmos;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace HospitalManagementCosmosDB.Infrastructure.Repository
 {
@@ -22,7 +19,8 @@ namespace HospitalManagementCosmosDB.Infrastructure.Repository
             {
                 var response = await _container.ReadItemAsync<Idempotency>(
                     key,
-                    new PartitionKey(key));
+                    new PartitionKey(key)
+                );
 
                 return response.Resource;
             }
@@ -34,9 +32,7 @@ namespace HospitalManagementCosmosDB.Infrastructure.Repository
 
         public async Task SaveAsync(Idempotency record)
         {
-            await _container.CreateItemAsync(
-                record,
-                new PartitionKey(record.Id));
+            await _container.CreateItemAsync(record, new PartitionKey(record.Id));
         }
     }
 }

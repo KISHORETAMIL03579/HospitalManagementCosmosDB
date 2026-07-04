@@ -1,11 +1,8 @@
-using HospitalManagementCosmosDB.Application.AutoMapping;
 using HospitalManagementCosmosDB.Infrastructure.Injection;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Options;
 
-
 var builder = WebApplication.CreateBuilder(args);
-
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
@@ -14,8 +11,8 @@ builder.Services.AddSwaggerGen();
 // Infrastructure
 builder.Services.AddInfrastructure(builder.Configuration);
 
-// AutoMapper
-builder.Services.AddAutoMapper(typeof(AutoMap).Assembly);
+// DI
+builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
 if (app.Environment.IsDevelopment())

@@ -2,5 +2,8 @@
   <Project Path="HospitalManagement.Application/HospitalManagementCosmosDB.Application.csproj" />
   <Project Path="HospitalManagementCosmosDB.Domain/HospitalManagementCosmosDB.Domain.csproj" />
   <Project Path="HospitalManagementCosmosDB.Infrastructure/HospitalManagementCosmosDB.Infrastructure.csproj" />
-  <Project Path="WebApplication1/HospitalManagementCosmosDB.API.csproj" Id="3d7adce3-0006-438d-86db-84b17a0221f1" />
+  <Project
+    Path="WebApplication1/HospitalManagementCosmosDB.API.csproj"
+    Id="3d7adce3-0006-438d-86db-84b17a0221f1"
+  />
 </Solution>

@@ -1,11 +1,8 @@
-﻿using HospitalManagementCosmosDB.Application.Interfaces;
+﻿using System.Net;
+using HospitalManagementCosmosDB.Application.Interfaces;
 using HospitalManagementCosmosDB.Domain.Entities;
 using HospitalManagementCosmosDB.Infrastructure.Injection;
 using Microsoft.Azure.Cosmos;
-using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Text;
 
 namespace HospitalManagementCosmosDB.Infrastructure.Repository
 {
@@ -26,7 +23,9 @@ namespace HospitalManagementCosmosDB.Infrastructure.Repository
         // GET ALL
         public async Task<List<Patient>> GetAll()
         {
-            var query = _container.GetItemQueryIterator<Patient>(new QueryDefinition("SELECT * FROM c"));
+            var query = _container.GetItemQueryIterator<Patient>(
+                new QueryDefinition("SELECT * FROM c")
+            );
 
             var results = new List<Patient>();
 
@@ -65,7 +64,11 @@ namespace HospitalManagementCosmosDB.Infrastructure.Repository
         // UPDATE (UPSERT)
         public async Task<Patient> UpdateById(Patient patient)
         {
-            var response = await _container.ReplaceItemAsync(patient, patient.Id, new PartitionKey(patient.Id));
+            var response = await _container.ReplaceItemAsync(
+                patient,
+                patient.Id,
+                new PartitionKey(patient.Id)
+            );
 
             return response.Resource;
         }

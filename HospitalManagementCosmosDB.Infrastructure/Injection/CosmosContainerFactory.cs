@@ -1,8 +1,5 @@
 ﻿using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace HospitalManagementCosmosDB.Infrastructure.Injection
 {
@@ -11,9 +8,7 @@ namespace HospitalManagementCosmosDB.Infrastructure.Injection
         private readonly CosmosClient _client;
         private readonly string _databaseId;
 
-        public CosmosContainerFactory(
-            CosmosClient client,
-            IOptions<CosmosDbOptions> options)  
+        public CosmosContainerFactory(CosmosClient client, IOptions<CosmosDbOptions> options)
         {
             _client = client;
             _databaseId = options.Value.DatabaseId;

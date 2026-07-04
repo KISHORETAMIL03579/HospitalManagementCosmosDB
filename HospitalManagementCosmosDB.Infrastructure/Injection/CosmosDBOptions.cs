@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace HospitalManagementCosmosDB.Infrastructure.Injection
+﻿namespace HospitalManagementCosmosDB.Infrastructure.Injection
 {
     public class CosmosDbOptions
     {
@@ -10,8 +6,8 @@ namespace HospitalManagementCosmosDB.Infrastructure.Injection
         public string AccountKey { get; set; } = null!;
         public string DatabaseId { get; set; } = null!;
         public List<CosmosContainerOptions> Containers { get; set; } = new();
-
     }
+
     public class CosmosContainerOptions
     {
         public string ContainerId { get; set; } = null!;

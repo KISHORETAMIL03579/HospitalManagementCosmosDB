@@ -1,8 +1,4 @@
 ﻿using Microsoft.Azure.Cosmos;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Text;
 
 namespace HospitalManagementCosmosDB.Infrastructure.Injection
 {
@@ -44,7 +40,8 @@ namespace HospitalManagementCosmosDB.Infrastructure.Injection
                         await db.Database.CreateContainerIfNotExistsAsync(
                             id: item.ContainerId,
                             partitionKeyPath: item.PartitionKeyPath,
-                            throughput: 400);
+                            throughput: 400
+                        );
 
                         Console.WriteLine($"Ensured container: {item.ContainerId}");
                         created = true;
@@ -53,7 +50,8 @@ namespace HospitalManagementCosmosDB.Infrastructure.Injection
                     catch (CosmosException ex)
                     {
                         Console.WriteLine(
-                            $"[WARN] Attempt {i} failed for {item.ContainerId}: {ex.StatusCode}");
+                            $"[WARN] Attempt {i} failed for {item.ContainerId}: {ex.StatusCode}"
+                        );
 
                         await Task.Delay(3000);
                     }
@@ -62,10 +60,12 @@ namespace HospitalManagementCosmosDB.Infrastructure.Injection
                 if (!created)
                 {
                     Console.WriteLine(
-                        $"[WARN] Skipping container {item.ContainerId}. Emulator still initializing.");
+                        $"[WARN] Skipping container {item.ContainerId}. Emulator still initializing."
+                    );
                 }
             }
         }
+
         private static async Task RetryAsync(Func<Task> action, int retries = 5)
         {
             for (int i = 0; i < retries; i++)
@@ -76,8 +76,9 @@ namespace HospitalManagementCosmosDB.Infrastructure.Injection
                     return;
                 }
                 catch (CosmosException ex)
-                    when (ex.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable ||
-                          ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+                    when (ex.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable
+                        || ex.StatusCode == System.Net.HttpStatusCode.NotFound
+                    )
                 {
                     await Task.Delay(2000);
                 }

@@ -14,6 +14,7 @@ namespace HospitalManagementCosmosDB.API.Controllers
     public class PatientController : ControllerBase
     {
         private readonly IPatientService _service;
+
         public PatientController(IPatientService service)
         {
             _service = service;
@@ -55,7 +56,10 @@ namespace HospitalManagementCosmosDB.API.Controllers
         #region Idempotent Create Method
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreatePatientDTO dto,[FromServices] IdempotencyRepository repo)
+        public async Task<IActionResult> Create(
+            [FromBody] CreatePatientDTO dto,
+            [FromServices] IdempotencyRepository repo
+        )
         {
             if (!Request.Headers.TryGetValue("Idempotency-Key", out var key))
             {
@@ -83,12 +87,14 @@ namespace HospitalManagementCosmosDB.API.Controllers
             var result = await _service.Create(dto);
 
             // 🔹 Save idempotency record
-            await repo.SaveAsync(new Idempotency
-            {
-                Id = key!,
-                RequestHash = requestHash,
-                ResponseJson = JsonConvert.SerializeObject(result)
-            });
+            await repo.SaveAsync(
+                new Idempotency
+                {
+                    Id = key!,
+                    RequestHash = requestHash,
+                    ResponseJson = JsonConvert.SerializeObject(result),
+                }
+            );
 
             return CreatedAtAction(nameof(GetById), result);
         }
@@ -116,6 +122,5 @@ namespace HospitalManagementCosmosDB.API.Controllers
         }
 
         #endregion
-        
     }
 }

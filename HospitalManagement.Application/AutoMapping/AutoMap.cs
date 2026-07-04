@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using AutoMapper;
+﻿using AutoMapper;
 using HospitalManagementCosmosDB.Application.DTO;
 using HospitalManagementCosmosDB.Domain.Entities;
+
 namespace HospitalManagementCosmosDB.Application.AutoMapping
 {
     public class AutoMap : Profile
