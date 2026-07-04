@@ -56,8 +56,8 @@ namespace HospitalManagementCosmosDB.Infrastructure.Injection
 
             services.AddSingleton<CosmosContainerFactory>();
 
-            services.AddSingleton<IPatientRepository, PatientRepository>();
-            services.AddSingleton<IPatientService, PatientService>();
+            services.AddScoped<IPatientRepository, PatientRepository>();
+            services.AddScoped<IPatientService, PatientService>();
             services.AddSingleton<IdempotencyRepository>();
 
             return services;
