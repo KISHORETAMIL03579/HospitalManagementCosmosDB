@@ -6,17 +6,17 @@ namespace HospitalManagementCosmosDB.Infrastructure.Injection
     public class CosmosContainerFactory
     {
         private readonly CosmosClient _client;
-        private readonly string _databaseId;
+        private readonly CosmosDbOptions _options;
 
         public CosmosContainerFactory(CosmosClient client, IOptions<CosmosDbOptions> options)
         {
             _client = client;
-            _databaseId = options.Value.DatabaseId;
+            _options = options.Value;
         }
 
         public Container GetContainer(string containerId)
         {
-            return _client.GetContainer(_databaseId, containerId);
+            return _client.GetContainer(_options.DatabaseId, containerId);
         }
     }
 }

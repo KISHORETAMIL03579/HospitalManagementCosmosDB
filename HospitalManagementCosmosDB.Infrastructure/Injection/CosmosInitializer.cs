@@ -1,4 +1,5 @@
-﻿using Microsoft.Azure.Cosmos;
+﻿using System.Net;
+using Microsoft.Azure.Cosmos;
 
 namespace HospitalManagementCosmosDB.Infrastructure.Injection
 {
@@ -40,7 +41,7 @@ namespace HospitalManagementCosmosDB.Infrastructure.Injection
                         await db.Database.CreateContainerIfNotExistsAsync(
                             id: item.ContainerId,
                             partitionKeyPath: item.PartitionKeyPath,
-                            throughput: 400
+                            throughput: int.Parse(item.Throughput) // cosmos can handle requests with a throughput of 400 RU/s, which is the minimum for a container
                         );
 
                         Console.WriteLine($"Ensured container: {item.ContainerId}");
@@ -66,9 +67,36 @@ namespace HospitalManagementCosmosDB.Infrastructure.Injection
             }
         }
 
-        private static async Task RetryAsync(Func<Task> action, int retries = 5)
+        //private static async Task RetryAsync(Func<Task> action, int retries = 5)
+        //{
+        //    for (int i = 0; i < retries; i++)
+        //    {
+        //        try
+        //        {
+        //            await action();
+        //            return;
+        //        }
+        //        catch (CosmosException ex)
+        //            when (ex.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable
+        //                || ex.StatusCode == System.Net.HttpStatusCode.NotFound
+        //            )
+        //        {
+        //            await Task.Delay(2000);
+        //        }
+        //    }
+
+        //    throw new Exception("Cosmos DB Emulator is not ready");
+        //}
+
+        private static async Task RetryAsync(
+            Func<Task> action,
+            int retries = 5,
+            int delayMilliseconds = 2000
+        )
         {
-            for (int i = 0; i < retries; i++)
+            Exception? lastException = null;
+
+            for (int i = 1; i <= retries; i++)
             {
                 try
                 {
@@ -76,15 +104,22 @@ namespace HospitalManagementCosmosDB.Infrastructure.Injection
                     return;
                 }
                 catch (CosmosException ex)
-                    when (ex.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable
-                        || ex.StatusCode == System.Net.HttpStatusCode.NotFound
+                    when (ex.StatusCode == HttpStatusCode.ServiceUnavailable
+                        || ex.StatusCode == HttpStatusCode.TooManyRequests
                     )
                 {
-                    await Task.Delay(2000);
+                    lastException = ex;
+
+                    Console.WriteLine($"Retry {i}/{retries}. Status: {ex.StatusCode}");
+
+                    await Task.Delay(delayMilliseconds);
                 }
             }
 
-            throw new Exception("Cosmos DB Emulator is not ready");
+            throw new InvalidOperationException(
+                "Cosmos DB operation failed after multiple retries.",
+                lastException
+            );
         }
     }
 }

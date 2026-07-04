@@ -10,12 +10,18 @@ namespace HospitalManagementCosmosDB.Infrastructure.Injection
 {
     public static class DependencyInjection
     {
-        public static IServiceCollection AddInfrastructure(
+        public static IServiceCollection AddInfrastructureCosmos(
             this IServiceCollection services,
             IConfiguration configuration
         )
         {
-            services.Configure<CosmosDbOptions>(configuration.GetSection("CosmosDb"));
+            //services.Configure<CosmosDbOptions>(configuration.GetSection("CosmosDb"));
+
+            services
+                .AddOptions<CosmosDbOptions>()
+                .Bind(configuration.GetSection("CosmosDb"))
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
 
             //services.AddSingleton(sp =>
             //{
@@ -23,28 +29,28 @@ namespace HospitalManagementCosmosDB.Infrastructure.Injection
             //    return new CosmosClient(opt.AccountEndpoint, opt.AccountKey);
             //});
 
-            services.AddSingleton(sp =>
-            {
-                var opt = sp.GetRequiredService<IOptions<CosmosDbOptions>>().Value;
+            //services.AddSingleton(sp =>
+            //{
+            //    var opt = sp.GetRequiredService<IOptions<CosmosDbOptions>>().Value;
 
-                return new CosmosClient(
-                    opt.AccountEndpoint,
-                    opt.AccountKey,
-                    new CosmosClientOptions
-                    {
-                        ConnectionMode = ConnectionMode.Gateway,
-                        HttpClientFactory = () =>
-                        {
-                            var handler = new HttpClientHandler
-                            {
-                                ServerCertificateCustomValidationCallback =
-                                    HttpClientHandler.DangerousAcceptAnyServerCertificateValidator,
-                            };
-                            return new HttpClient(handler);
-                        },
-                    }
-                );
-            });
+            //    return new CosmosClient(
+            //        opt.AccountEndpoint,
+            //        opt.AccountKey,
+            //        new CosmosClientOptions
+            //        {
+            //            ConnectionMode = ConnectionMode.Gateway,
+            //            HttpClientFactory = () =>
+            //            {
+            //                var handler = new HttpClientHandler
+            //                {
+            //                    ServerCertificateCustomValidationCallback =
+            //                        HttpClientHandler.DangerousAcceptAnyServerCertificateValidator,
+            //                };
+            //                return new HttpClient(handler);
+            //            },
+            //        }
+            //    );
+            //});
 
             //services.AddSingleton(sp =>
             //{
@@ -53,6 +59,47 @@ namespace HospitalManagementCosmosDB.Infrastructure.Injection
 
             //    return client.GetContainer(opt.DatabaseId, opt.ContainerId);
             //});
+
+            services.AddSingleton(sp =>
+            {
+                var opt = sp.GetRequiredService<IOptions<CosmosDbOptions>>().Value;
+                if (
+                    !Enum.TryParse<ConnectionMode>(
+                        opt.ConnectionMode,
+                        ignoreCase: true,
+                        out var connectionMode
+                    )
+                )
+                {
+                    throw new InvalidOperationException(
+                        $"Invalid ConnectionMode: {opt.ConnectionMode}"
+                    );
+                }
+
+                var clientOptions = new CosmosClientOptions
+                {
+                    ConnectionMode = connectionMode,
+
+                    MaxRetryAttemptsOnRateLimitedRequests = opt.RetryOptions.MaxRetryAttempts,
+
+                    MaxRetryWaitTimeOnRateLimitedRequests = TimeSpan.FromSeconds(
+                        opt.RetryOptions.MaxRetryWaitTimeSeconds
+                    ),
+
+                    HttpClientFactory = () =>
+                    {
+                        var handler = new HttpClientHandler
+                        {
+                            ServerCertificateCustomValidationCallback =
+                                HttpClientHandler.DangerousAcceptAnyServerCertificateValidator,
+                        };
+
+                        return new HttpClient(handler);
+                    },
+                };
+
+                return new CosmosClient(opt.AccountEndpoint, opt.AccountKey, clientOptions);
+            });
 
             services.AddSingleton<CosmosContainerFactory>();
 
