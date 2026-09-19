@@ -1,6 +1,22 @@
+# Build artifacts
 **/bin/
 **/obj/
+
+# Git
 .git/
 .github/
+
+# VS Code / Visual Studio
 .vscode/
+.vs/
+
+# Local configuration
 .env
+.env.*
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
