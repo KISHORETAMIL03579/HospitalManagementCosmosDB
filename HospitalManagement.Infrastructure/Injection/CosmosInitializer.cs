@@ -1,57 +1,67 @@
 using System.Net;
 using Microsoft.Azure.Cosmos;
+using Microsoft.Extensions.Logging;
 
 namespace HospitalManagement.Infrastructure.Injection
 {
-    public class CosmosInitializer
+    public static class CosmosInitializer
     {
-        public static async Task InitializeAsync(CosmosClient client, CosmosDbOptions options)
+        public static async Task InitializeAsync(
+            CosmosClient client,
+            CosmosDbOptions options,
+            ILogger? logger = null
+        )
         {
-            //var db = await client.CreateDatabaseIfNotExistsAsync(options.DatabaseId);
-            //foreach (var item in options.Containers)
-            //{
-            //    await db.Database.CreateContainerIfNotExistsAsync(id: item.ContainerId, partitionKeyPath: item.PartitionKeyPath, throughput: 400);
-            //    Console.WriteLine($"Ensured container: {item.ContainerId}");
-            //}
+            var dbResponse = await client.CreateDatabaseIfNotExistsAsync(options.DatabaseId);
+            var database = dbResponse.Database;
 
-            //var db = await client.CreateDatabaseIfNotExistsAsync(options.DatabaseId);
-
-            //foreach (var item in options.Containers)
-            //{
-            //    await RetryAsync(async () =>
-            //    {
-            //        await db.Database.CreateContainerIfNotExistsAsync(
-            //            id: item.ContainerId,
-            //            partitionKeyPath: item.PartitionKeyPath,
-            //            throughput: 400);
-
-            //        Console.WriteLine($"Ensured container: {item.ContainerId}");
-            //    });
-            //}
-
-            var db = await client.CreateDatabaseIfNotExistsAsync(options.DatabaseId);
             foreach (var item in options.Containers)
             {
                 bool created = false;
 
-                for (int i = 1; i <= 10; i++)
+                for (int attempt = 1; attempt <= 10; attempt++)
                 {
                     try
                     {
-                        await db.Database.CreateContainerIfNotExistsAsync(
-                            id: item.ContainerId,
-                            partitionKeyPath: item.PartitionKeyPath,
-                            throughput: int.Parse(item.Throughput) // cosmos can handle requests with a throughput of 400 RU/s, which is the minimum for a container
+                        var containerProperties = new ContainerProperties
+                        {
+                            Id = item.ContainerId,
+                            PartitionKeyPath = item.PartitionKeyPath,
+                        };
+
+                        if (item.Throughput.HasValue && item.Throughput.Value > 0)
+                        {
+                            await database.CreateContainerIfNotExistsAsync(
+                                containerProperties,
+                                throughput: item.Throughput.Value
+                            );
+                        }
+                        else
+                        {
+                            await database.CreateContainerIfNotExistsAsync(containerProperties);
+                        }
+
+                        logger?.LogInformation(
+                            "Ensured Cosmos DB container: {ContainerId} with Partition Key {PartitionKeyPath}",
+                            item.ContainerId,
+                            item.PartitionKeyPath
                         );
 
-                        Console.WriteLine($"Ensured container: {item.ContainerId}");
                         created = true;
                         break;
                     }
                     catch (CosmosException ex)
+                        when (ex.StatusCode == HttpStatusCode.ServiceUnavailable
+                            || ex.StatusCode == HttpStatusCode.TooManyRequests
+                            || ex.StatusCode == HttpStatusCode.RequestTimeout
+                        )
                     {
-                        Console.WriteLine(
-                            $"[WARN] Attempt {i} failed for {item.ContainerId}: {ex.StatusCode}"
+                        logger?.LogWarning(
+                            ex,
+                            "Attempt {Attempt}/10 failed for container {ContainerId} (Status: {StatusCode}). Retrying in 3 seconds...",
+                            attempt,
+                            item.ContainerId,
+                            ex.StatusCode
                         );
 
                         await Task.Delay(3000);
@@ -60,66 +70,12 @@ namespace HospitalManagement.Infrastructure.Injection
 
                 if (!created)
                 {
-                    Console.WriteLine(
-                        $"[WARN] Skipping container {item.ContainerId}. Emulator still initializing."
+                    logger?.LogWarning(
+                        "Skipping container creation for {ContainerId} after 10 attempts. Cosmos DB emulator may still be initializing.",
+                        item.ContainerId
                     );
                 }
             }
-        }
-
-        //private static async Task RetryAsync(Func<Task> action, int retries = 5)
-        //{
-        //    for (int i = 0; i < retries; i++)
-        //    {
-        //        try
-        //        {
-        //            await action();
-        //            return;
-        //        }
-        //        catch (CosmosException ex)
-        //            when (ex.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable
-        //                || ex.StatusCode == System.Net.HttpStatusCode.NotFound
-        //            )
-        //        {
-        //            await Task.Delay(2000);
-        //        }
-        //    }
-
-        //    throw new Exception("Cosmos DB Emulator is not ready");
-        //}
-
-        private static async Task RetryAsync(
-            Func<Task> action,
-            int retries = 5,
-            int delayMilliseconds = 2000
-        )
-        {
-            Exception? lastException = null;
-
-            for (int i = 1; i <= retries; i++)
-            {
-                try
-                {
-                    await action();
-                    return;
-                }
-                catch (CosmosException ex)
-                    when (ex.StatusCode == HttpStatusCode.ServiceUnavailable
-                        || ex.StatusCode == HttpStatusCode.TooManyRequests
-                    )
-                {
-                    lastException = ex;
-
-                    Console.WriteLine($"Retry {i}/{retries}. Status: {ex.StatusCode}");
-
-                    await Task.Delay(delayMilliseconds);
-                }
-            }
-
-            throw new InvalidOperationException(
-                "Cosmos DB operation failed after multiple retries.",
-                lastException
-            );
         }
     }
 }

@@ -31,8 +31,7 @@ namespace HospitalManagement.Infrastructure.Injection
         [Required]
         public string PartitionKeyPath { get; set; } = string.Empty;
 
-        [Required]
-        public string Throughput { get; set; } = string.Empty;
+        public int? Throughput { get; set; } = 400;
     }
 
     public class RetryOptions

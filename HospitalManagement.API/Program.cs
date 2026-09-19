@@ -124,7 +124,7 @@ using (var scope = app.Services.CreateScope())
             );
         }
 
-        await CosmosInitializer.InitializeAsync(cosmosClient, cosmosOptions);
+        await CosmosInitializer.InitializeAsync(cosmosClient, cosmosOptions, logger);
 
         logger.LogInformation("Cosmos DB initialized successfully.");
     }

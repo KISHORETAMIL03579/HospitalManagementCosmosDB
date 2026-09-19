@@ -365,4 +365,5 @@ FodyWeavers.xsd
 # Environment secret files
 .env
 .env.*
+!.env.example
 *.env
