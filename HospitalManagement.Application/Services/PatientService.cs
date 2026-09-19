@@ -1,10 +1,10 @@
-﻿using AutoMapper;
-using HospitalManagementCosmosDB.Application.DTO;
-using HospitalManagementCosmosDB.Application.Interfaces;
-using HospitalManagementCosmosDB.Domain.Entities;
+using AutoMapper;
+using HospitalManagement.Application.DTO;
+using HospitalManagement.Application.Interfaces;
+using HospitalManagement.Domain.Entities;
 using Microsoft.Extensions.Logging;
 
-namespace HospitalManagementCosmosDB.Application.Services
+namespace HospitalManagement.Application.Services
 {
     public class PatientService : IPatientService
     {

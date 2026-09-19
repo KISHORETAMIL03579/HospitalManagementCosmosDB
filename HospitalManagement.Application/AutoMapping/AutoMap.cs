@@ -1,8 +1,8 @@
-﻿using AutoMapper;
-using HospitalManagementCosmosDB.Application.DTO;
-using HospitalManagementCosmosDB.Domain.Entities;
+using AutoMapper;
+using HospitalManagement.Application.DTO;
+using HospitalManagement.Domain.Entities;
 
-namespace HospitalManagementCosmosDB.Application.AutoMapping
+namespace HospitalManagement.Application.AutoMapping
 {
     public class AutoMap : Profile
     {

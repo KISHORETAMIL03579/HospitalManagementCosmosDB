@@ -1,8 +1,8 @@
-﻿using System.Security.Cryptography;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 
-namespace HospitalManagementCosmosDB.Application.Helpers
+namespace HospitalManagement.Application.Helpers
 {
     public class RequestHashHelper
     {

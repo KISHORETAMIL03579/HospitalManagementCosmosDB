@@ -1,6 +1,6 @@
-﻿using HospitalManagementCosmosDB.Domain.Entities;
+using HospitalManagement.Domain.Entities;
 
-namespace HospitalManagementCosmosDB.Application.Interfaces
+namespace HospitalManagement.Application.Interfaces
 {
     public interface IPatientRepository
     {

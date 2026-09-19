@@ -1,6 +1,6 @@
-﻿using HospitalManagementCosmosDB.Application.DTO;
+using HospitalManagement.Application.DTO;
 
-namespace HospitalManagementCosmosDB.Application.Interfaces
+namespace HospitalManagement.Application.Interfaces
 {
     public interface IPatientService
     {

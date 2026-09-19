@@ -1,6 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
-namespace HospitalManagementCosmosDB.Application.DTO
+namespace HospitalManagement.Application.DTO
 {
     public class CreatePatientDTO
     {

@@ -1,7 +1,7 @@
-﻿using HospitalManagementCosmosDB.Application.AutoMapping;
+using HospitalManagement.Application.AutoMapping;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace HospitalManagementCosmosDB.Application
+namespace HospitalManagement.Application
 {
     public static class DependencyInjection
     {
@@ -11,6 +11,8 @@ namespace HospitalManagementCosmosDB.Application
             {
                 cfg.AddProfile<AutoMap>();
             });
+
+            services.AddScoped<Interfaces.IAuthService, Services.AuthService>();
 
             return services;
         }
